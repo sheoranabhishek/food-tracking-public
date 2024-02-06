@@ -13,8 +13,8 @@ const passport = require('passport')
 const Emitter = require('events')
 
 // Database connection
-const url = //Enter your Mongoose URL
-mongoose.connect(url, { useNewUrlParser: true, useCreateIndex:true, useUnifiedTopology: true, useFindAndModify : true });
+const url = process.env.MONGO_URL
+mongoose.connect(url, { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true, useFindAndModify: true });
 const connection = mongoose.connection;
 connection.once('open', () => {
     console.log('Database connected...');
@@ -24,9 +24,9 @@ connection.once('open', () => {
 
 // Session store 
 let mongoStore = new MongoDbStore({
-                mongooseConnection: connection,
-                collection: 'sessions'
-            })
+    mongooseConnection: connection,
+    collection: 'sessions'
+})
 
 // Event emitter 
 const eventEmitter = new Emitter()
@@ -35,9 +35,9 @@ app.set('eventEmitter', eventEmitter)
 // Session config
 app.use(session({
     secret: 'thisismysecret',
-    resave: false, 
+    resave: false,
     store: mongoStore,
-    saveUninitialized: false, 
+    saveUninitialized: false,
     cookie: { maxAge: 1000 * 60 * 60 * 24 } // 24 hour 
 }))
 
@@ -67,22 +67,22 @@ app.set('view engine', 'ejs')
 require('./routes/web')(app)
 
 //404 Page Middleware
-app.use((req ,res)=> {
+app.use((req, res) => {
     res.status(404).render('error/404')
 })
 
-const server = app.listen(PORT , () => {
-            console.log(`Listening on port ${PORT}`)
-        })
+const server = app.listen(PORT, () => {
+    console.log(`Listening on port ${PORT}`)
+})
 
 // Socket 
 
 const io = require('socket.io')(server)
 io.on('connection', (socket) => {
-      // Join  
-      socket.on('join', (orderId) => {
+    // Join  
+    socket.on('join', (orderId) => {
         socket.join(orderId)
-      })
+    })
 })
 
 eventEmitter.on('orderUpdated', (data) => {

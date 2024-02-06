@@ -1,14 +1,7 @@
 const Order = require('../../../models/order')
 const moment = require('moment')
-const stripe = require('stripe')('YOUR STRIPE SECRET KEY HERE')
-const nodemailer = require('nodemailer')
-const sendgridTransport = require('nodemailer-sendgrid-transport')
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 
-const transporter = nodemailer.createTransport(sendgridTransport({
-    auth: {
-        api_key: '//SENDGRID API HERE'
-    }
-}));
 function orderController () {
     return {
         store(req, res) {
@@ -43,14 +36,6 @@ function orderController () {
                                 const eventEmitter = req.app.get('eventEmitter')
                                 eventEmitter.emit('orderPlaced', ord)
                                 delete req.session.cart
-                                transporter.sendMail({
-                                    to:placedOrder.customerId.email,
-                                    from: '//YOUR VERIFIED EMAIL ID HERE ',
-                                    subject: 'Order Placed Successfully' ,
-                                    html: `<h1>You have successfully placed your order . Payment Completed</h1> <br> <h3> Your food will arrive soon. </h3>`
-                                }).catch((err)=> {
-                                    console.log(err);
-                                })
                                 return res.json({ message : 'Payment successful, Order placed successfully' });
 
                             }).catch((err) => {
@@ -58,26 +43,10 @@ function orderController () {
                             })
 
                         }).catch((err) => {
-                            transporter.sendMail({
-                                to:placedOrder.customerId.email,
-                                from: '//YOUR VERIFIED EMAIL ID HERE',
-                                subject: 'Order Placed Successfully' ,
-                                html: `<h1>You have successfully placed your order . Payment Failed , Pay on Delivery </h1> <br> <h3> Your food will arrive soon. </h3>`
-                            }).catch((err)=> {
-                                console.log(err);
-                            })
                             delete req.session.cart
                             return res.json({ message : 'OrderPlaced but payment failed, You can pay at delivery time' });
                         })
                     } else {
-                        transporter.sendMail({
-                            to:placedOrder.customerId.email,
-                            from: '//YOUR VERIFIED EMAIL ID HERE',
-                            subject: 'Order Placed Successfully' ,
-                            html: `<h1>You have successfully placed your order . Payment to be done as COD . </h1> <br> <h3> Your food will arrive soon. </h3>`
-                        }).catch((err)=> {
-                            console.log(err);
-                        })
                         delete req.session.cart
                         return res.json({ message : 'Order placed succesfully' });
                     }
