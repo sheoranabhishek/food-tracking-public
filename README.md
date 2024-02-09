@@ -1,5 +1,7 @@
 # food-tracking-public
 
+Deployed on : https://foodfactory-he23.onrender.com
+
 --- Readme Will be updated soon 
 --- Clone the repo 
 --- Run yarn install 
